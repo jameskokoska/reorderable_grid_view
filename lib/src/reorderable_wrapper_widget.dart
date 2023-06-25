@@ -73,7 +73,7 @@ class GridChildPosDelegate extends ReorderableChildPosDelegate {
 class ReorderableWrapperWidget extends StatefulWidget
     with ReorderableGridWidgetMixin {
   @override
-  final ReorderCallback onReorder;
+  final Future<bool> Function(int oldIndex, int newIndex) onReorder;
 
   @override
   final DragWidgetBuilderV2? dragWidgetBuilder;
@@ -127,7 +127,6 @@ class ReorderableWrapperWidget extends StatefulWidget
   ReorderableWrapperWidgetState createState() {
     return ReorderableWrapperWidgetState();
   }
-
 }
 
 /// Yes we can't get grid delegate here, because we don't know child.

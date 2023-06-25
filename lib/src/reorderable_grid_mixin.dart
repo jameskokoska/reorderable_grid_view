@@ -21,7 +21,7 @@ abstract class ReorderableChildPosDelegate {
 }
 
 mixin ReorderableGridWidgetMixin on StatefulWidget {
-  ReorderCallback get onReorder;
+  Future<bool> Function(int oldIndex, int newIndex) get onReorder;
   DragWidgetBuilderV2? get dragWidgetBuilder;
   ScrollSpeedController? get scrollSpeedController;
   PlaceholderBuilder? get placeholderBuilder;
@@ -127,7 +127,7 @@ mixin ReorderableGridStateMixin<T extends ReorderableGridWidgetMixin>
       // SliverGridGeometry(scrollOffset: 0.0, crossAxisOffset: 140.47619047619048, mainAxisExtent: 217.46031746031747, crossAxisExtent: 130.47619047619048), index: 1
       // SliverGridGeometry(scrollOffset: 227.46031746031747, crossAxisOffset: 0.0, mainAxisExtent: 217.46031746031747, crossAxisExtent: 130.47619047619048), index: 3
       // index is not the right index!!!
-      final fixedIndex = child!.indexInAll?? child.index;
+      final fixedIndex = child!.indexInAll ?? child.index;
       final SliverGridGeometry gridGeometry =
           layout.getGeometryForChildIndex(fixedIndex);
       final rst =
@@ -205,12 +205,14 @@ mixin ReorderableGridStateMixin<T extends ReorderableGridWidgetMixin>
 
   @override
   Widget build(BuildContext context) {
-    if (widget.isSliver?? false || !(widget.restrictDragScope?? false)) {
+    if (widget.isSliver ?? false || !(widget.restrictDragScope ?? false)) {
       return widget.child;
     }
     return Stack(children: [
       widget.child,
-      Overlay(key: overlayKey,)
+      Overlay(
+        key: overlayKey,
+      )
     ]);
   }
 
@@ -256,12 +258,12 @@ mixin ReorderableGridStateMixin<T extends ReorderableGridWidgetMixin>
       // should never happen
       return;
     }
-    if (widget.dragWidgetBuilder?.isScreenshotDragWidget?? false) {
+    if (widget.dragWidgetBuilder?.isScreenshotDragWidget ?? false) {
       ui.Image? screenshot = await takeScreenShot(item);
-      ByteData? byteData = await screenshot?.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData != null) {
-        _dragInfo?.startDrag(MemoryImage(byteData.buffer.asUint8List()));
-      }
+      ByteData? byteData =
+          await screenshot?.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return;
+      _dragInfo?.startDrag(MemoryImage(byteData!.buffer.asUint8List()));
     } else {
       _dragInfo?.startDrag(null);
     }
@@ -277,8 +279,8 @@ mixin ReorderableGridStateMixin<T extends ReorderableGridWidgetMixin>
     setState(() {});
   }
 
-  _onDragEnd(DragInfo item) {
-    widget.onReorder(_dragIndex!, _dropIndex!);
+  _onDragEnd(DragInfo item) async {
+    await widget.onReorder(_dragIndex!, _dropIndex!);
     _dragReset();
   }
 
@@ -312,12 +314,14 @@ mixin ReorderableGridStateMixin<T extends ReorderableGridWidgetMixin>
   }
 
   // Places the value from startIndex one space before the element at endIndex.
-  void reorder(int startIndex, int endIndex) {
+  void reorder(int startIndex, int endIndex) async {
     // what to do??
-    setState(() {
-      if (startIndex != endIndex) widget.onReorder(startIndex, endIndex);
-      // Animates leftover space in the drop area closed.
-    });
+    if (startIndex != endIndex) {
+      await widget.onReorder(startIndex, endIndex);
+      setState(() {
+        // Animates leftover space in the drop area closed.
+      });
+    }
   }
 
   final Map<int, ReorderableItemViewState> __items =

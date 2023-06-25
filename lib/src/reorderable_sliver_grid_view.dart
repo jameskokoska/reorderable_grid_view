@@ -15,7 +15,7 @@ class ReorderableSliverGridView extends StatelessWidget {
   final double crossAxisSpacing;
   final double childAspectRatio;
 
-  final ReorderCallback onReorder;
+  final Future<bool> Function(int oldIndex, int newIndex) onReorder;
   final DragWidgetBuilderV2? dragWidgetBuilderV2;
   final ScrollSpeedController? scrollSpeedController;
   final PlaceholderBuilder? placeholderBuilder;
@@ -46,7 +46,7 @@ class ReorderableSliverGridView extends StatelessWidget {
   const ReorderableSliverGridView.count({
     Key? key,
     required int crossAxisCount,
-    required ReorderCallback onReorder,
+    required Future<bool> Function(int oldIndex, int newIndex) onReorder,
     DragWidgetBuilderV2? dragWidgetBuilderV2,
     List<Widget>? footer,
     List<Widget>? header,

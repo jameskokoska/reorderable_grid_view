@@ -19,17 +19,22 @@ typedef DragWidgetBuilder = Widget Function(int index, Widget child);
 class DragWidgetBuilderV2 {
   /// if ture, will create a screenshot fo the drag widget
   final bool isScreenshotDragWidget;
-  /// [screenshot] will not null if you provide isTakeScreenshotDragWidget = ture.
-  final Widget Function(int index, Widget child, ImageProvider? screenshot) builder;
 
-  DragWidgetBuilderV2({this.isScreenshotDragWidget = false, required this.builder});
+  /// [screenshot] will not null if you provide isTakeScreenshotDragWidget = ture.
+  final Widget Function(int index, Widget child, ImageProvider? screenshot)
+      builder;
+
+  DragWidgetBuilderV2(
+      {this.isScreenshotDragWidget = false, required this.builder});
 
   /// a helper method to covert deprecated build to current builder
-  static DragWidgetBuilderV2? createByOldBuilder9(DragWidgetBuilder? oldBuilder) {
+  static DragWidgetBuilderV2? createByOldBuilder9(
+      DragWidgetBuilder? oldBuilder) {
     if (oldBuilder == null) return null;
     return DragWidgetBuilderV2(
-      isScreenshotDragWidget: false,
-      builder: (int index, Widget child, ImageProvider? screenshot) => oldBuilder(index, child));
+        isScreenshotDragWidget: false,
+        builder: (int index, Widget child, ImageProvider? screenshot) =>
+            oldBuilder(index, child));
   }
 }
 // typedef DragWidgetBuilderV2 = Widget Function(int index, Widget child, ByteData? dragWidgetScreenshot);
@@ -81,7 +86,7 @@ typedef OnDragUpdate = void Function(
 /// constraint, and that method look called by the framework.
 /// So I need the crossAxisCount, spacing to determine the pos.
 class ReorderableGridView extends StatelessWidget {
-  final ReorderCallback onReorder;
+  final Future<bool> Function(int oldIndex, int newIndex) onReorder;
   final DragWidgetBuilderV2? dragWidgetBuilderV2;
   final ScrollSpeedController? scrollSpeedController;
   final PlaceholderBuilder? placeholderBuilder;
@@ -112,7 +117,7 @@ class ReorderableGridView extends StatelessWidget {
 
   ReorderableGridView.builder({
     Key? key,
-    required ReorderCallback onReorder,
+    required Future<bool> Function(int oldIndex, int newIndex) onReorder,
     ScrollSpeedController? scrollSpeedController,
     DragWidgetBuilder? dragWidgetBuilder,
     DragWidgetBuilderV2? dragWidgetBuilderV2,
@@ -144,7 +149,8 @@ class ReorderableGridView extends StatelessWidget {
   }) : this(
           key: key,
           onReorder: onReorder,
-          dragWidgetBuilderV2: dragWidgetBuilderV2?? DragWidgetBuilderV2.createByOldBuilder9(dragWidgetBuilder),
+          dragWidgetBuilderV2: dragWidgetBuilderV2 ??
+              DragWidgetBuilderV2.createByOldBuilder9(dragWidgetBuilder),
           scrollSpeedController: scrollSpeedController,
           placeholderBuilder: placeholderBuilder,
           onDragStart: onDragStart,
@@ -194,7 +200,7 @@ class ReorderableGridView extends StatelessWidget {
 
   factory ReorderableGridView.count({
     Key? key,
-    required ReorderCallback onReorder,
+    required Future<bool> Function(int oldIndex, int newIndex) onReorder,
     DragWidgetBuilder? dragWidgetBuilder,
     DragWidgetBuilderV2? dragWidgetBuilderV2,
     ScrollSpeedController? scrollSpeedController,
@@ -236,7 +242,8 @@ class ReorderableGridView extends StatelessWidget {
     return ReorderableGridView(
       key: key,
       onReorder: onReorder,
-      dragWidgetBuilderV2: dragWidgetBuilderV2?? DragWidgetBuilderV2.createByOldBuilder9(dragWidgetBuilder),
+      dragWidgetBuilderV2: dragWidgetBuilderV2 ??
+          DragWidgetBuilderV2.createByOldBuilder9(dragWidgetBuilder),
       scrollSpeedController: scrollSpeedController,
       placeholderBuilder: placeholderBuilder,
       onDragStart: onDragStart,
